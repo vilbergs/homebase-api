@@ -3,7 +3,7 @@ import {
   serve,
   validateRequest,
 } from "https://deno.land/x/sift@0.1.7/mod.ts";
-import { config } from "https://deno.land/x/dotenv@v2.0.0/mod.ts";
+import "https://deno.land/x/dotenv@v2.0.0/load.ts";
 
 interface Temperature {
   value: number
@@ -15,6 +15,7 @@ interface Zone {
   temperature: Temperature
   humidity: number
 }
+
 
 serve({
   "/zones": handleZones,
@@ -66,7 +67,10 @@ async function getAllZones() {
       allZones {
         data {
           name
-          temperature
+          temperature {
+            value
+            unit
+          }
           humidity
         }
       }
@@ -78,7 +82,7 @@ async function getAllZones() {
       allZones: { data: zones },
     },
     error,
-  } = await queryFuana(query, {});
+  } = await queryFauna(query, {});
   if (error) {
     return { error };
   }
@@ -107,7 +111,7 @@ async function createZone(name: string): Promise<{ name?: string, temperature?: 
   const {
     data: { createZone },
     error,
-  } = await queryFuana(query, { name });
+  } = await queryFauna(query, { name });
   if (error) {
     return { error };
   }
@@ -115,7 +119,7 @@ async function createZone(name: string): Promise<{ name?: string, temperature?: 
   return createZone; // Zone
 }
 
-async function queryFuana(
+async function queryFauna(
   query: string,
   variables: { [key: string]: unknown },
 ): Promise<{
@@ -123,7 +127,7 @@ async function queryFuana(
   error?: any;
 }> {
   // Grab the secret from the environment.
-  const token = config().FAUNA_SECRET;
+  const token = Deno.env.get('FAUNA_SECRET');
   if (!token) {
     throw new Error("environment variable FAUNA_SECRET not set");
   }

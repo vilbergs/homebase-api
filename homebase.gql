@@ -1,0 +1,20 @@
+enum TemperatureUnit {
+  CELCIUS
+  FAHRENHEIT
+}
+
+type Temperature {
+  value: Float
+  unit: TemperatureUnit
+}
+
+type Zone {
+  id: ID
+  name: String!
+  temperature: Temperature
+  humidity: Float
+}
+
+type Query {
+  allZones: [Zone!]
+}

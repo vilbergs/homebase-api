@@ -2,25 +2,24 @@ import {
   json,
   serve,
   validateRequest,
-} from "https://deno.land/x/sift@0.1.7/mod.ts";
-import "https://deno.land/x/dotenv@v2.0.0/load.ts";
+  PathParams
+} from "https://deno.land/x/sift@0.2.0/mod.ts";
 
 interface Temperature {
-  value: number
-  unit: 'CELSIUS' | 'FAHRENHEIT'
+  value: number;
+  unit: "CELSIUS" | "FAHRENHEIT";
 }
 
 interface Zone {
-  name: string
-  temperature: Temperature
-  humidity: number
+  name: string;
+  temperature: Temperature;
+  humidity: number;
 }
-
 
 serve({
   "/zones": handleZones,
+  "/zones/:id": updateZone,
 });
-
 
 async function handleZones(request: Request) {
   // We allow GET requests and POST requests with the
@@ -40,7 +39,7 @@ async function handleZones(request: Request) {
   // Handle POST requests.
   if (request.method === "POST") {
     const { name, temperature, humidity, error } = await createZone(
-      (body as {name: string}).name,
+      (body as { name: string }).name
     );
     if (error) {
       return json({ error: "couldn't create the zone" }, { status: 500 });
@@ -60,12 +59,57 @@ async function handleZones(request: Request) {
   }
 }
 
+async function updateZone(request: Request, params?: PathParams) {
+  const { error, body } = await validateRequest(request, {
+    PUT: { body: ["temperature"] }
+  });
+
+  if (error) {
+    return json({ error }, { status: 500 });
+  }
+
+  
+
+  const query = `
+    mutation($id: ID!, $name:String, $temperature: TemperatureInput, $humidity: Float) {
+      partialUpdateZone(
+        id: $id,
+        data: { name: $name, temperature: { create: $temperature }, humidity: $humidity}
+      ) {
+        _id
+        name
+        temperature {
+          value
+          unit
+        }
+        humidity
+      }
+    }
+  `;
+
+ // Handle POST requests.
+ if (request.method === "PUT" && params?.id) {
+  const { data, error} = await queryFauna(
+    query,
+    { id: params.id, ...body },
+  );
+  if (error) {
+    return json({ error }, { status: 500 });
+  }
+
+  return json(data, { status: 200 });
+}
+
+return json({ error: "couldn't update the zone" }, { status: 500 });
+}
+
 /** Get all zones available in the database. */
 async function getAllZones() {
   const query = `
     query {
       allZones {
         data {
+          _id
           name
           temperature {
             value
@@ -91,7 +135,14 @@ async function getAllZones() {
 }
 
 /** Create a new zone in the database. */
-async function createZone(name: string): Promise<{ name?: string, temperature?: Temperature; humidity?: number; error?: string }> {
+async function createZone(
+  name: string
+): Promise<{
+  name?: string;
+  temperature?: Temperature;
+  humidity?: number;
+  error?: string;
+}> {
   const query = `
     mutation($name: String!) {
       createZone(
@@ -107,7 +158,7 @@ async function createZone(name: string): Promise<{ name?: string, temperature?: 
       }
     }
   `;
-    
+
   const {
     data: { createZone },
     error,
@@ -121,13 +172,15 @@ async function createZone(name: string): Promise<{ name?: string, temperature?: 
 
 async function queryFauna(
   query: string,
-  variables: { [key: string]: unknown },
+  variables: { [key: string]: unknown }
 ): Promise<{
   data?: any;
   error?: any;
 }> {
+
+  console.log(variables)
   // Grab the secret from the environment.
-  const token = Deno.env.get('FAUNA_SECRET');
+  const token = Deno.env.get("FAUNA_SECRET");
   if (!token) {
     throw new Error("environment variable FAUNA_SECRET not set");
   }
@@ -140,6 +193,8 @@ async function queryFauna(
       headers: {
         authorization: `Bearer ${token}`,
         "content-type": "application/json",
+        "X-Schema-Preview": "partial-update-mutation"
+
       },
       body: JSON.stringify({
         query,
@@ -158,4 +213,3 @@ async function queryFauna(
     return { error };
   }
 }
-

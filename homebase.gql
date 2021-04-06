@@ -1,5 +1,5 @@
 enum TemperatureUnit {
-  CELCIUS
+  CELSIUS
   FAHRENHEIT
 }
 
@@ -9,7 +9,6 @@ type Temperature {
 }
 
 type Zone {
-  id: ID
   name: String!
   temperature: Temperature
   humidity: Float

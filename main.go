@@ -68,13 +68,15 @@ func main() {
 
 
   router := mux.NewRouter().StrictSlash(true)
-	db.InfluxInit()
 
 
 	postgresErr := db.PostgresInit()
 	if postgresErr != nil {
 		log.Fatalf("Could not set up Postgres: %v", postgresErr)
 	}
+
+	db.InfluxInit()
+
 
 	router.Handle("/telemetry", jwtMiddleware.Handler(handlers.AddTelemetry)).Methods("POST")
 	router.Handle("/zones", jwtMiddleware.Handler(handlers.AddZone)).Methods("POST")

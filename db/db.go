@@ -46,6 +46,10 @@ func PostgresInit() error {
     return nil
 }
 
-func InfluxInit() {
-    Influx = influxdb2.NewClient("http://localhost:8086", INFLUX_TOKEN)
+func InfluxInit() error {
+    hostname := "influx_db"
+
+    Influx = influxdb2.NewClient(fmt.Sprintf("http://%s:8086", hostname), INFLUX_TOKEN)
+
+    return nil
 }

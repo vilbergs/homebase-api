@@ -11,7 +11,7 @@ func AddTelemetry(t *models.Telemetry) error {
   writeAPI := Influx.WriteAPI(INFLUX_ORG, INLFUX_BUCKET)
 
 	// write line protocol
-	writeAPI.WriteRecord(fmt.Sprintf("stat, zoneId=%d temperature=%f,humidity=%f", t.ZoneId, t.Temperature, t.Humidity))
+	writeAPI.WriteRecord(fmt.Sprintf("telemetry,zoneId=%d temperature=%f,humidity=%f", t.ZoneId, t.Temperature, t.Humidity))
 	// Flush writes
 	writeAPI.Flush()
 

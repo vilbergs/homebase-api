@@ -4,10 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file: .env
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - database
+      - influx_db
     networks:
       - default
   database:
@@ -20,8 +22,8 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
-  influxdb:
-    image: influxdb-alpine-2.0
+  influx_db:
+    image: influxdb:2.0-alpine
     volumes:
       - data:/.influxdbv2
     ports:

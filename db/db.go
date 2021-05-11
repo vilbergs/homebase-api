@@ -16,9 +16,9 @@ import (
  * - https://docs.docker.com/config/containers/container-networking/#ip-address-and-hostname
  */
 const (
-	POSTGRES_HOST = "postgres_db"
+	POSTGRES_HOST = "postgres-db"
 	POSTGRES_PORT = 5432
-	INFLUX_HOST   = "influx_db"
+	INFLUX_HOST   = "influx-db"
 	INFLUX_PORT   = 8086
 )
 
@@ -27,7 +27,7 @@ var (
 	POSTGRES_PW   = os.Getenv("POSTGRES_PASSWORD")
 	POSTGRES_DB   = os.Getenv("POSTGRES_DB_NAME")
 	INFLUX_TOKEN  = os.Getenv("INFLUX_TOKEN")
-	INLFUX_BUCKET = os.Getenv("INFLUX_BUCKET")
+	INFLUX_BUCKET = os.Getenv("INFLUX_BUCKET")
 	INFLUX_ORG    = os.Getenv("INFLUX_ORG")
 )
 
@@ -62,10 +62,11 @@ func PostgresInit() error {
 }
 
 func InfluxInit() error {
-
 	Influx = influxdb2.NewClient(fmt.Sprintf("http://%s:%d", INFLUX_HOST, INFLUX_PORT), INFLUX_TOKEN)
 
 	log.Println("Influx connection established")
+	log.Println(INFLUX_TOKEN)
+	log.Println(INFLUX_BUCKET)
 
 	return nil
 }

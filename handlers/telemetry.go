@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/vilbergs/homebase-api/db"
@@ -21,11 +22,12 @@ var AddTelemetry = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	json.Unmarshal(reqBody, &newTelemetry)
 	db.AddTelemetry(&newTelemetry)
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
 	encodedTelemetry, _ := json.Marshal(newTelemetry)
 
-	fmt.Printf("Created telemetry %s", string(encodedTelemetry))
+	log.Printf("Created telemetry %s", string(encodedTelemetry))
 
-  json.NewEncoder(w).Encode(encodedTelemetry)
+	json.NewEncoder(w).Encode(newTelemetry)
 })

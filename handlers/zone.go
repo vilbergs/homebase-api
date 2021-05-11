@@ -27,5 +27,5 @@ var AddZone = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Created zone %s", string(jZone))
 
-  json.NewEncoder(w).Encode(newZone)
+	json.NewEncoder(w).Encode(newZone)
 })

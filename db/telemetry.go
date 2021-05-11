@@ -8,7 +8,7 @@ import (
 )
 
 func AddTelemetry(t *models.Telemetry) error {
-  writeAPI := Influx.WriteAPI(INFLUX_ORG, INLFUX_BUCKET)
+	writeAPI := Influx.WriteAPI(INFLUX_ORG, INFLUX_BUCKET)
 
 	// write line protocol
 	writeAPI.WriteRecord(fmt.Sprintf("telemetry,zoneId=%d temperature=%f,humidity=%f", t.ZoneId, t.Temperature, t.Humidity))

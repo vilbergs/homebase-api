@@ -1,18 +1,21 @@
 version: "3.7"
 services:
   api:
+    container_name: homebase-api
     build:
       context: .
       dockerfile: Dockerfile
     env_file: .env
     ports:
       - "8080:8080"
+    volumes:
+      - ./:/go/src/app/
     depends_on:
-      - postgres_db
-      - influx_db
+      - postgres-db
+      - influx-db
     networks:
       - default
-  postgres_db:
+  postgres-db:
     image: postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -22,11 +25,21 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
-  influx_db:
+  influx-db:
     image: influxdb:2.0-alpine
     volumes:
       - data:/.influxdbv2
     ports:
       - "8086:8086"
+  # influxdb_cli:
+  #   links:
+  #     - influx-db
+  #   image: influxdb:2.0-alpine
+  #   entrypoint:
+  #     influx setup --bucket homebase -t qEfhA73ryqsuZS8AmCAkngbF-GsNLKr5Cf3OgnsJ7YsGA06B9Ywq85ohGgUr96BpuobwFmLIIrhgdwfH4gdkIA== -o Homebase --username=homebase --password=homebase_pass --host=http://influx-db:8086 -f
+  #     # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service.
+  #   restart: on-failure:10
+  #   depends_on:
+  #     - influx-db
 volumes:
   data:

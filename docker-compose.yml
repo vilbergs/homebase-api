@@ -8,8 +8,6 @@ services:
     env_file: .env
     ports:
       - "8080:8080"
-    volumes:
-      - ./:/go/src/app/
     depends_on:
       - postgres-db
       - influx-db

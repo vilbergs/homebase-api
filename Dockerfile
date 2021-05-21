@@ -10,9 +10,9 @@ RUN go mod download -x
 COPY . .
 
 
-RUN go build -ldflags '-w -s' -a -o ./bin/api ./cmd/api \
-    && go build -ldflags '-w -s' -a -o ./bin/migrate ./cmd/migrate
+# RUN go build -ldflags '-w -s' -a -o ./bin/api ./cmd/api \
+#     && go build -ldflags '-w -s' -a -o ./bin/migrate ./cmd/migrate
+# CMD ["./bin/api"]
 
-# RUN go get github.com/githubnemo/CompileDaemon
-# ENTRYPOINT CompileDaemon --build="go build -o ./bin/api ./cmd/api" --command="./bin/api"
-CMD ["./bin/api"]
+RUN go get github.com/githubnemo/CompileDaemon
+ENTRYPOINT CompileDaemon --build="go build -o ./bin/api ./cmd/api" --command="./bin/api"

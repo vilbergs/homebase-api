@@ -65,8 +65,6 @@ func InfluxInit() error {
 	Influx = influxdb2.NewClient(fmt.Sprintf("http://%s:%d", INFLUX_HOST, INFLUX_PORT), INFLUX_TOKEN)
 
 	log.Println("Influx connection established")
-	log.Println(INFLUX_TOKEN)
-	log.Println(INFLUX_BUCKET)
 
 	return nil
 }

@@ -8,6 +8,8 @@ services:
     env_file: .env
     ports:
       - "8080:8080"
+    # volumes:
+    #   - ./:/go/src/api/
     depends_on:
       - postgres-db
       - influx-db
@@ -22,11 +24,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
   influx-db:
     image: influxdb:2.0-alpine
     volumes:
-      - data:/.influxdbv2
+      - influxdb:/var/lib/influxdb2
+      - influxdb:/etc/influxdb2
     ports:
       - "8086:8086"
   # influxdb_cli:
@@ -40,4 +43,5 @@ services:
   #   depends_on:
   #     - influx-db
 volumes:
-  data:
+  postgres:
+  influxdb:

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gorilla/mux"
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/rs/cors"
 	"github.com/vilbergs/homebase-api/db"
 	"github.com/vilbergs/homebase-api/handlers"
@@ -29,7 +29,6 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-var influxClient influxdb2.Client
 var zones = []models.Zone{}
 
 var ZoneGetHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -73,9 +72,17 @@ func main() {
 
 	db.InfluxInit()
 
-	router.Handle("/telemetry", jwtMiddleware.Handler(handlers.AddTelemetry)).Methods("POST")
-	router.Handle("/zones", jwtMiddleware.Handler(handlers.AddZone)).Methods("POST")
-	router.Handle("/zones", jwtMiddleware.Handler(ZoneGetHandler)).Methods("GET")
+	envType := os.Getenv("API_ENV")
+
+	if envType == "DEV" {
+		router.Handle("/telemetry/{zoneId:[0-9]+}", handlers.AddTelemetry).Methods("POST")
+		router.Handle("/zones", handlers.AddZone).Methods("POST")
+		router.Handle("/zones", handlers.GetALLZones).Methods("GET")
+	} else {
+		router.Handle("/telemetry/{zoneId:[0-9]+}", jwtMiddleware.Handler(handlers.AddTelemetry)).Methods("POST")
+		router.Handle("/zones", jwtMiddleware.Handler(handlers.AddZone)).Methods("POST")
+		router.Handle("/zones", jwtMiddleware.Handler(ZoneGetHandler)).Methods("GET")
+	}
 
 	corsWrapper := cors.New(cors.Options{
 		AllowedMethods: []string{"GET", "POST"},

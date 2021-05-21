@@ -29,3 +29,13 @@ var AddZone = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(newZone)
 })
+
+var GetALLZones = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	zones, err := db.GetALLZones()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	json.NewEncoder(w).Encode(zones)
+})

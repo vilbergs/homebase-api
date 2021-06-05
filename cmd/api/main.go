@@ -13,7 +13,6 @@ import (
 	"github.com/rs/cors"
 	"github.com/vilbergs/homebase-api/db"
 	"github.com/vilbergs/homebase-api/handlers"
-	"github.com/vilbergs/homebase-api/models"
 )
 
 type Jwks struct {
@@ -28,13 +27,6 @@ type JSONWebKeys struct {
 	E   string   `json:"e"`
 	X5c []string `json:"x5c"`
 }
-
-var zones = []models.Zone{}
-
-var ZoneGetHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	json.NewEncoder(w).Encode(zones)
-})
 
 func main() {
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
@@ -78,10 +70,12 @@ func main() {
 		router.Handle("/telemetry/{zoneId:[0-9]+}", handlers.AddTelemetry).Methods("POST")
 		router.Handle("/zones", handlers.AddZone).Methods("POST")
 		router.Handle("/zones", handlers.GetALLZones).Methods("GET")
+		router.Handle("/zones/{zoneId:[0-9]+}", handlers.GetZone).Methods("GET")
 	} else {
 		router.Handle("/telemetry/{zoneId:[0-9]+}", jwtMiddleware.Handler(handlers.AddTelemetry)).Methods("POST")
 		router.Handle("/zones", jwtMiddleware.Handler(handlers.AddZone)).Methods("POST")
-		router.Handle("/zones", jwtMiddleware.Handler(ZoneGetHandler)).Methods("GET")
+		router.Handle("/zones", jwtMiddleware.Handler(handlers.GetALLZones)).Methods("GET")
+		router.Handle("/zones/{zoneId:[0-9]+}", jwtMiddleware.Handler(handlers.GetZone)).Methods("GET")
 	}
 
 	corsWrapper := cors.New(cors.Options{

@@ -8,8 +8,8 @@ services:
     env_file: .env
     ports:
       - "8080:8080"
-    # volumes:
-    #   - ./:/go/src/api/
+    volumes:
+      - ./:/go/src/api/
     depends_on:
       - postgres-db
       - influx-db
@@ -32,6 +32,24 @@ services:
       - influxdb:/etc/influxdb2
     ports:
       - "8086:8086"
+    # Use the influx cli to set up an influxdb instance.
+  influxdb_cli:
+    links:
+      - influx-db
+    image: quay.io/influxdb/influxdb:v2.0.3
+    environment:
+      - INFLUX_USER=${INFLUX_USER}
+      - INFLUX_PASSWORD=${INFLUX_PASSWORD}
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+      - INFLUX_ORG=${INFLUX_ORG}
+    # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
+    entrypoint:
+      influx setup --bucket $INFLUX_BUCKET -t $INFLUX_TOKEN -o $INFLUX_ORG --username=$INFLUX_USER --password=$INFLUX_PASSWORD --host=http://influx-db:8086 -f
+      # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service.
+    restart: on-failure:10
+    depends_on:
+      - influx-db
   # influxdb_cli:
   #   links:
   #     - influx-db

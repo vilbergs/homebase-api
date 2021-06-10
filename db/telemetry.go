@@ -1,8 +1,11 @@
 package db
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 
 	"github.com/vilbergs/homebase-api/models"
 )
@@ -10,10 +13,17 @@ import (
 func AddTelemetry(t *models.Telemetry, zoneId int) error {
 	writeAPI := Influx.WriteAPI(INFLUX_ORG, INFLUX_BUCKET)
 
-	// write line protocol
-	writeAPI.WriteRecord(fmt.Sprintf("telemetry,zoneId=%d temperature=%f,humidity=%f", zoneId, t.Temperature, t.Humidity))
-	// Flush writes
-	writeAPI.Flush()
+	writeAPI.WritePoint(write.NewPoint(
+		"telemetry",
+		map[string]string{
+			"zoneId": strconv.Itoa(zoneId),
+		},
+		map[string]interface{}{
+			"temperature": t.Temperature,
+			"humidity":    t.Humidity,
+		},
+		time.Now(),
+	))
 
 	return nil
 }

@@ -25,6 +25,8 @@ func AddTelemetry(t *models.Telemetry, zoneId int) error {
 		time.Now(),
 	))
 
+	writeAPI.Flush()
+
 	return nil
 }
 
